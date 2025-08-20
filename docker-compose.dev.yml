@@ -12,6 +12,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
   backend:
     build: ./backend
     env_file: [./backend/.env]
@@ -27,15 +28,20 @@ services:
     volumes:
       - ./backend/app:/app/app
       - ./backend/alembic:/app/alembic
+
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
     environment:
-      VITE_API_BASE: http://localhost:8000/api
-    ports: ["5173:5173"]
+      NODE_ENV: development         # 🔥 installe aussi les devDependencies (tailwind, postcss…)
+      VITE_API_BASE: http://backend:8000/api
+    ports:
+      - "5173:5173"
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/app             # 🔥 code monté en live → hot reload
+      - /app/node_modules           # 🔥 évite d’écraser node_modules
+    command: npm run dev -- --host 0.0.0.0   # 🔥 expose vite au host
+
 volumes:
   db_data:
