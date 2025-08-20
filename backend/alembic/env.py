@@ -1,7 +1,11 @@
 from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-import os
+import sys, os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../app'))
+
 config = context.config
 fileConfig(config.config_file_name)
 from app.db.models import Base
