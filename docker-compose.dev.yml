@@ -34,14 +34,15 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     environment:
-      NODE_ENV: development         # 🔥 installe aussi les devDependencies (tailwind, postcss…)
+      NODE_ENV: development
       VITE_API_BASE: http://backend:8000/api
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app             # 🔥 code monté en live → hot reload
-      - /app/node_modules           # 🔥 évite d’écraser node_modules
-    command: npm run dev -- --host 0.0.0.0   # 🔥 expose vite au host
+      - ./frontend:/app
+      - node_modules:/app/node_modules
+    command: npm run dev -- --host 0.0.0.0
 
 volumes:
   db_data:
+  node_modules:

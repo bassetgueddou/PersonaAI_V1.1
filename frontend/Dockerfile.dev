@@ -1,15 +1,19 @@
 FROM node:20-alpine
 WORKDIR /app
 
-#  manifests
+# Copie uniquement les manifests
 COPY package.json package-lock.json* ./
 
-# tailwind/postcss/autoprefixer)
+# On veut les devDependencies en DEV
 ENV NODE_ENV=development
-RUN npm install
 
-# sources seront montées par le volumeeee
+# Optionnel: si lock absent, npm install; sinon npm ci
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+# Petit entrypoint: installe si node_modules est vide (utile avec volume)
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 5173
-
-# Fuck u listen
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["npm","run","dev","--","--host","0.0.0.0"]
