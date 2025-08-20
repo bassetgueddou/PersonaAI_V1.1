@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: basset
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+      POSTGRES_DB: bassetbot
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U basset -d bassetbot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  backend:
+    build: ./backend
+    env_file: [./backend/.env]
+    environment:
+      DATABASE_URL: postgresql+psycopg2://basset:${POSTGRES_PASSWORD:-change_me}@db:5432/bassetbot
+      LOG_LEVEL: info
+      MODEL_NAME: ${MODEL_NAME:-gpt-4o-mini}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://example.com}
+    depends_on:
+      db:
+        condition: service_healthy
+    expose: ["8000"]
+  web:
+    build: ./frontend
+    environment:
+      API_UPSTREAM: backend:8000
+    ports: ["80:80"]
+    depends_on:
+      backend:
+        condition: service_started
+volumes:
+  db_data:
